@@ -1,18 +1,9 @@
 import { ComponentParam } from "./@types/global"
 
-const Edge = ({ canvas, centerX, centerY }: ComponentParam) => {
-  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+const Edge = ({ ctx, centerX, centerY }: ComponentParam) => {
   const path = new Path2D()
   path.arc(centerX, centerY, 400, 0, 2 * Math.PI)
   ctx.fillStyle = 'green'
-  ctx.fill(path)
-}
-
-const Wheel = ({ canvas, centerX, centerY }: ComponentParam) => {
-  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
-  const path = new Path2D()
-  path.arc(centerX, centerY, 380, 0, 2 * Math.PI)
-  ctx.fillStyle = 'white'
   ctx.fill(path)
 }
 
@@ -23,8 +14,7 @@ type PieceParam = Entry & {
   angle: number,
   arcLength: number,
 }
-const Piece = ({ canvas, centerX, centerY, angle, arcLength, label }: PieceParam & ComponentParam) => {
-  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+const Piece = ({ ctx, centerX, centerY, angle, arcLength, label }: PieceParam & ComponentParam) => {
   const path = new Path2D()
   path.moveTo(centerX, centerY)
   path.arc(centerX, centerY, 380, angle - arcLength / 2, angle + arcLength / 2)
@@ -38,9 +28,9 @@ const Piece = ({ canvas, centerX, centerY, angle, arcLength, label }: PieceParam
 type PiecesParam = {
   entries: Entry[];
 }
-const Pieces = ({ canvas, centerX, centerY, entries }: PiecesParam & ComponentParam) => {
-  entriesToPieceParams(entries).forEach((params) => {
-    Piece({ ...params, canvas, centerX, centerY })
+const Pieces = ({ entries, ...rest }: PiecesParam & ComponentParam) => {
+  entriesToPieceParams(entries).forEach((entry) => {
+    Piece({ ...entry, ...rest })
   })
 }
 
@@ -53,10 +43,40 @@ const entriesToPieceParams = (entries: Entry[]): PieceParam[] => {
   }))
 }
 
-const drawRoulette = (): void => {
-  const canvas = <HTMLCanvasElement>document.getElementById('roulette')
+const PlaySign = ({ ctx, centerX, centerY }: ComponentParam) => {
+  const side = 30
+  const path = new Path2D()
+  path.moveTo(centerX - side / Math.sqrt(3), centerY - side)
+  path.lineTo(centerX + side * 2 / Math.sqrt(3), centerY)
+  path.lineTo(centerX - side / Math.sqrt(3), centerY + side)
+  path.closePath()
+  ctx.fillStyle = 'white'
+  ctx.fill(path)
+}
+
+const ShaftBody = ({ ctx, centerX, centerY }: ComponentParam) => {
+  const path = new Path2D()
+  path.arc(centerX, centerY, 40, 0, 2 * Math.PI)
+  ctx.lineWidth = 20
+  ctx.strokeStyle = 'marin'
+  ctx.stroke(path)
+  ctx.fillStyle = 'royalblue'
+  ctx.fill(path)
+}
+
+const Shaft = (param: ComponentParam) => {
+  ShaftBody(param)
+  PlaySign(param)
+}
+
+const draw = (rotate: number): void => {
+  const canvas = <HTMLCanvasElement>document.getElementById('spinner')
   const centerX = canvas.width / 2
   const centerY = canvas.height / 2
+  const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+  const param: ComponentParam = {
+    rotate, ctx, centerX, centerY
+  }
   const entries = [{
     label: 'カステラ',
   }, {
@@ -66,14 +86,20 @@ const drawRoulette = (): void => {
   }, {
     label: 'りんご',
   }]
-
-  const params: ComponentParam = {
-    canvas, centerX, centerY
-  }
-  Edge(params)
-  Wheel(params)
-  Pieces({ ...params, entries })
+  Edge(param)
+  Pieces({ ...param, entries })
+  Shaft(param)
 }
 
+const spin = (rotate: number, delta: number): void => {
+  const newRotate = rotate + delta
+  draw(newRotate)
 
-document.addEventListener('DOMContentLoaded', drawRoulette)
+  const newDelta = delta * 0.99
+  if (newDelta < 0.1) {
+    return
+  }
+  window.requestAnimationFrame(() => spin(newRotate, delta * 0.99));
+}
+
+document.addEventListener('DOMContentLoaded', () => draw(0))

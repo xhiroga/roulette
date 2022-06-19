@@ -1,5 +1,6 @@
 export type ComponentParam = {
-  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
   centerX: number;
   centerY: number;
+  rotate: number;
 }
