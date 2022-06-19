@@ -21,10 +21,9 @@ type Entry = {
 }
 type PieceParam = Entry & {
   angle: number,
-  color: string,
   arcLength: number,
 }
-const Piece = ({ canvas, centerX, centerY, angle, arcLength, color, label }: PieceParam & ComponentParam) => {
+const Piece = ({ canvas, centerX, centerY, angle, arcLength, label }: PieceParam & ComponentParam) => {
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   const path = new Path2D()
   path.moveTo(centerX, centerY)
@@ -32,7 +31,7 @@ const Piece = ({ canvas, centerX, centerY, angle, arcLength, color, label }: Pie
   path.lineTo(centerX, centerY)
   ctx.strokeStyle = 'white'
   ctx.stroke(path)
-  ctx.fillStyle = color
+  ctx.fillStyle = `HSLA(${angle / Math.PI * 180}, 100%, 66%, 1)`
   ctx.fill(path)
 }
 
@@ -50,9 +49,7 @@ const entriesToPieceParams = (entries: Entry[]): PieceParam[] => {
   return entries.map((entry, index) => ({
     ...entry,
     angle: index / total * Math.PI * 2,
-    arcLength: Math.PI * 2 / total,
-    color: 'red',
-    radius: 1 / total * Math.PI * 2,
+    arcLength: Math.PI * 2 / total
   }))
 }
 
