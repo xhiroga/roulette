@@ -19,12 +19,12 @@ const Wheel = ({ canvas, centerX, centerY }: ComponentParam) => {
 type Entry = {
   label: string
 }
-type PocketParam = Entry & {
+type PieceParam = Entry & {
   angle: number,
   color: string,
   arcLength: number,
 }
-const Pocket = ({ canvas, centerX, centerY, angle, arcLength, color, label }: PocketParam & ComponentParam) => {
+const Piece = ({ canvas, centerX, centerY, angle, arcLength, color, label }: PieceParam & ComponentParam) => {
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   const path = new Path2D()
   path.moveTo(centerX, centerY)
@@ -36,16 +36,16 @@ const Pocket = ({ canvas, centerX, centerY, angle, arcLength, color, label }: Po
   ctx.fill(path)
 }
 
-type PocketsParam = {
+type PiecesParam = {
   entries: Entry[];
 }
-const Pockets = ({ canvas, centerX, centerY, entries }: PocketsParam & ComponentParam) => {
-  entriesToPocketParams(entries).forEach((params) => {
-    Pocket({ ...params, canvas, centerX, centerY })
+const Pieces = ({ canvas, centerX, centerY, entries }: PiecesParam & ComponentParam) => {
+  entriesToPieceParams(entries).forEach((params) => {
+    Piece({ ...params, canvas, centerX, centerY })
   })
 }
 
-const entriesToPocketParams = (entries: Entry[]): PocketParam[] => {
+const entriesToPieceParams = (entries: Entry[]): PieceParam[] => {
   const total = entries.length
   return entries.map((entry, index) => ({
     ...entry,
@@ -75,7 +75,7 @@ const drawRoulette = (): void => {
   }
   Edge(params)
   Wheel(params)
-  Pockets({ ...params, entries })
+  Pieces({ ...params, entries })
 }
 
 
