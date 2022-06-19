@@ -1,4 +1,4 @@
-export type ComponentParams = {
+export type ComponentParam = {
   canvas: HTMLCanvasElement;
   centerX: number;
   centerY: number;
