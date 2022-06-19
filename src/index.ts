@@ -8,7 +8,7 @@ const drawRoulette = (): void => {
     canvas, centerX, centerY
   }
   Edge(params)
-  Roulette(params)
+  Wheel(params)
 }
 
 const Edge = ({ canvas, centerX, centerY }: ComponentParams) => {
@@ -19,7 +19,7 @@ const Edge = ({ canvas, centerX, centerY }: ComponentParams) => {
   ctx.fill(path)
 }
 
-const Roulette = ({ canvas, centerX, centerY }: ComponentParams) => {
+const Wheel = ({ canvas, centerX, centerY }: ComponentParams) => {
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   const path = new Path2D()
   path.arc(centerX, centerY, 380, 0, 2 * Math.PI)
