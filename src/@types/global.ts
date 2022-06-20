@@ -4,3 +4,8 @@ export type ComponentParam = {
   centerY: number;
   rotate: number;
 }
+
+export type Point = {
+  x: number;
+  y: number;
+}

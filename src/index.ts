@@ -1,10 +1,12 @@
-import { ComponentParam } from "./@types/global"
+import { ComponentParam, Point } from "./@types/global"
 
 const Edge = ({ ctx, centerX, centerY }: ComponentParam) => {
   const path = new Path2D()
   path.arc(centerX, centerY, 400, 0, 2 * Math.PI)
+  ctx.save()
   ctx.fillStyle = 'green'
   ctx.fill(path)
+  ctx.restore()
 }
 
 type Entry = {
@@ -16,21 +18,29 @@ type PieceParam = Entry & {
 }
 const Piece = ({ ctx, centerX, centerY, angle, arcLength, label }: PieceParam & ComponentParam) => {
   const path = new Path2D()
-  path.moveTo(centerX, centerY)
-  path.arc(centerX, centerY, 380, angle - arcLength / 2, angle + arcLength / 2)
-  path.lineTo(centerX, centerY)
+  path.moveTo(0, 0)
+  path.arc(0, 0, 380, - arcLength / 2, + arcLength / 2)
+  path.lineTo(0, 0)
+  console.log(`angle: ${angle}`)
+  ctx.save()
+  ctx.translate(centerX, centerY)
+  ctx.rotate(angle)
+  ctx.lineWidth = 20
   ctx.strokeStyle = 'white'
   ctx.stroke(path)
   ctx.fillStyle = `HSLA(${angle / Math.PI * 180}, 100%, 66%, 1)`
   ctx.fill(path)
+  ctx.fillStyle = 'white'
+  ctx.fillText(label, 10, 50);
+  ctx.restore()
 }
 
 type PiecesParam = {
   entries: Entry[];
 }
-const Pieces = ({ entries, ...rest }: PiecesParam & ComponentParam) => {
-  entriesToPieceParams(entries).forEach((entry) => {
-    Piece({ ...entry, ...rest })
+const Pieces = ({ entries, rotate, ...rest }: PiecesParam & ComponentParam) => {
+  entriesToPieceParams(entries).forEach(({ angle, ...restParam }) => {
+    Piece({ angle: angle + rotate, ...restParam, rotate, ...rest })
   })
 }
 
@@ -50,23 +60,30 @@ const PlaySign = ({ ctx, centerX, centerY }: ComponentParam) => {
   path.lineTo(centerX + side * 2 / Math.sqrt(3), centerY)
   path.lineTo(centerX - side / Math.sqrt(3), centerY + side)
   path.closePath()
+  ctx.save()
   ctx.fillStyle = 'white'
   ctx.fill(path)
+  ctx.restore()
 }
 
 const ShaftBody = ({ ctx, centerX, centerY }: ComponentParam) => {
   const path = new Path2D()
-  path.arc(centerX, centerY, 40, 0, 2 * Math.PI)
-  ctx.lineWidth = 20
-  ctx.strokeStyle = 'marin'
+  path.arc(centerX, centerY, 50, 0, 2 * Math.PI)
+  ctx.save()
+  ctx.lineWidth = 30
+  ctx.strokeStyle = 'white'
   ctx.stroke(path)
   ctx.fillStyle = 'royalblue'
   ctx.fill(path)
+  ctx.restore()
 }
 
 const Shaft = (param: ComponentParam) => {
   ShaftBody(param)
   PlaySign(param)
+
+  const testHit = (point: Point) => (point.x - param.centerX) ** 2 + (point.y - param.centerY) ** 2 < 50 ** 2
+  return { testHit }
 }
 
 const draw = (rotate: number): void => {
@@ -74,6 +91,7 @@ const draw = (rotate: number): void => {
   const centerX = canvas.width / 2
   const centerY = canvas.height / 2
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   const param: ComponentParam = {
     rotate, ctx, centerX, centerY
   }
@@ -88,18 +106,27 @@ const draw = (rotate: number): void => {
   }]
   Edge(param)
   Pieces({ ...param, entries })
-  Shaft(param)
+  const { testHit } = Shaft(param)
+
+  canvas.onclick = null;
+  canvas.addEventListener('click', function (e) {
+    const rect = canvas.getBoundingClientRect();
+    const point = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    };
+    if (testHit(point)) {
+      spin(rotate, Math.PI / 2)
+    }
+  });
 }
 
 const spin = (rotate: number, delta: number): void => {
-  const newRotate = rotate + delta
-  draw(newRotate)
-
-  const newDelta = delta * 0.99
-  if (newDelta < 0.1) {
+  if (delta < 0.005) {
     return
   }
-  window.requestAnimationFrame(() => spin(newRotate, delta * 0.99));
+  draw(rotate)
+  window.requestAnimationFrame(() => spin(rotate + delta, delta * 0.96));
 }
 
 document.addEventListener('DOMContentLoaded', () => draw(0))
