@@ -1,12 +1,21 @@
 import { ComponentParam, Point } from "./@types/global"
 
-const Edge = ({ ctx, centerX, centerY }: ComponentParam) => {
+type Hook = {
+  onHit?: () => void,
+  testHit?: (point: Point) => boolean,
+}
+type Component = (param: ComponentParam) => Hook
+
+let hooks: Hook[]
+
+const Edge: Component = ({ ctx, centerX, centerY }: ComponentParam) => {
   const path = new Path2D()
   path.arc(centerX, centerY, 400, 0, 2 * Math.PI)
   ctx.save()
   ctx.fillStyle = 'green'
   ctx.fill(path)
   ctx.restore()
+  return {}
 }
 
 type Entry = {
@@ -42,6 +51,7 @@ const Pieces = ({ entries, rotate, ...rest }: PiecesParam & ComponentParam) => {
   entriesToPieceParams(entries).forEach(({ angle, ...restParam }) => {
     Piece({ angle: angle + rotate, ...restParam, rotate, ...rest })
   })
+  return {}
 }
 
 const entriesToPieceParams = (entries: Entry[]): PieceParam[] => {
@@ -78,22 +88,32 @@ const ShaftBody = ({ ctx, centerX, centerY }: ComponentParam) => {
   ctx.restore()
 }
 
-const Shaft = (param: ComponentParam) => {
+const Shaft: Component = (param: ComponentParam) => {
   ShaftBody(param)
   PlaySign(param)
 
   const testHit = (point: Point) => (point.x - param.centerX) ** 2 + (point.y - param.centerY) ** 2 < 50 ** 2
-  return { testHit }
+  return { onHit: param.initSpin, testHit }
 }
 
-const draw = (rotate: number): void => {
-  const canvas = <HTMLCanvasElement>document.getElementById('spinner')
+const draw = (canvas: HTMLCanvasElement, rotate: number): Hook[] => {
+
   const centerX = canvas.width / 2
   const centerY = canvas.height / 2
+  const spin = (r: number, delta: number): void => {
+    if (delta < 0.01) {
+      return
+    }
+    hooks = draw(canvas, r)
+    window.requestAnimationFrame(() => spin(r + delta, delta * 0.97));
+  }
+  const initSpin = () => spin(rotate, Math.PI / 6)
+
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   const param: ComponentParam = {
-    rotate, ctx, centerX, centerY
+    rotate, ctx, centerX, centerY, initSpin
   }
   const entries = [{
     label: 'カステラ',
@@ -104,28 +124,29 @@ const draw = (rotate: number): void => {
   }, {
     label: 'りんご',
   }]
-  Edge(param)
-  Pieces({ ...param, entries })
-  const { testHit } = Shaft(param)
+  return [
+    Edge(param),
+    Pieces({ ...param, entries }),
+    Shaft(param)
+  ]
+}
 
+const main = () => {
+  const canvas = <HTMLCanvasElement>document.getElementById('spinner')
+
+  hooks = draw(canvas, 0)
   canvas.addEventListener('click', function (e) {
     const rect = canvas.getBoundingClientRect();
     const point = {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top
     };
-    if (testHit(point)) {
-      spin(rotate, Math.PI / 2)
-    }
+    hooks.forEach(hook => {
+      if (hook?.testHit?.(point)) {
+        hook?.onHit?.()
+      }
+    })
   });
 }
 
-const spin = (rotate: number, delta: number): void => {
-  if (delta < 0.005) {
-    return
-  }
-  draw(rotate)
-  window.requestAnimationFrame(() => spin(rotate + delta, delta * 0.96));
-}
-
-document.addEventListener('DOMContentLoaded', () => draw(0))
+document.addEventListener('DOMContentLoaded', main)

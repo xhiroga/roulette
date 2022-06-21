@@ -3,6 +3,7 @@ export type ComponentParam = {
   centerX: number;
   centerY: number;
   rotate: number;
+  initSpin: () => void
 }
 
 export type Point = {
