@@ -21,7 +21,6 @@ const Piece = ({ ctx, centerX, centerY, angle, arcLength, label }: PieceParam & 
   path.moveTo(0, 0)
   path.arc(0, 0, 380, - arcLength / 2, + arcLength / 2)
   path.lineTo(0, 0)
-  console.log(`angle: ${angle}`)
   ctx.save()
   ctx.translate(centerX, centerY)
   ctx.rotate(angle)
@@ -31,7 +30,8 @@ const Piece = ({ ctx, centerX, centerY, angle, arcLength, label }: PieceParam & 
   ctx.fillStyle = `HSLA(${angle / Math.PI * 180}, 100%, 66%, 1)`
   ctx.fill(path)
   ctx.fillStyle = 'white'
-  ctx.fillText(label, 10, 50);
+  ctx.font = '50px Arial'
+  ctx.fillText(label, 100, 0, 250);
   ctx.restore()
 }
 
@@ -108,7 +108,6 @@ const draw = (rotate: number): void => {
   Pieces({ ...param, entries })
   const { testHit } = Shaft(param)
 
-  canvas.onclick = null;
   canvas.addEventListener('click', function (e) {
     const rect = canvas.getBoundingClientRect();
     const point = {
