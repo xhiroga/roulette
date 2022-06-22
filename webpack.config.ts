@@ -5,7 +5,7 @@ const srcDir = path.join(__dirname, 'src')
 
 const config: Configuration = {
   entry: {
-    index: path.join(srcDir, 'index.ts')
+    index: path.join(srcDir, 'index.ts'),
   },
   output: {
     path: path.join(__dirname, 'dist'),
