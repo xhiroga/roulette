@@ -1,6 +1,6 @@
-# ルーレット
+# Spinner Maker
 
-選択肢や色を保存できるルーレットです。
+Play and create spinner wheel by [#SpinnerMaker](https://spinner-maker.vercel.app/)!
 
 ## Debug
 
