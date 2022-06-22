@@ -1,4 +1,6 @@
-import { ComponentParam, Point } from './@types/global'
+import './style.css'
+
+import { ComponentParam, Point } from './global'
 import { getQueryParams, QueryParams } from './get-query-params'
 
 type Hook = {
