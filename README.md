@@ -1,6 +1,6 @@
-# Spinner Maker
+# #SpinnerMaker
 
-Play and create spinner wheel by [#SpinnerMaker](https://spinner-maker.vercel.app/?labels=1&labels=2&labels=3&labels=4&labels=5)!
+Play and create spinner wheel by [#SpinnerMaker](https://spinner-maker.vercel.app/?labels=1&labels=2&labels=3&labels=4&labels=5)🌈
 
 ## Debug
 
