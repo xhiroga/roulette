@@ -11,12 +11,37 @@ type Component = (param: ComponentParam) => Hook
 
 let hooks: Hook[]
 
-const Edge: Component = ({ ctx, centerX, centerY }: ComponentParam) => {
+const Edge: Component = (param: ComponentParam) => {
+  EdgeInnerShadow(param)
+  EdgeLine(param)
+  return {}
+}
+
+const EdgeLine: Component = ({ ctx, centerX, centerY }: ComponentParam) => {
+  const path = new Path2D()
+  path.arc(centerX, centerY, 420, 0, 2 * Math.PI)
+  ctx.save()
+  ctx.lineWidth = 40
+  ctx.strokeStyle = 'white'
+  ctx.stroke(path)
+  ctx.restore()
+  return {}
+}
+
+const EdgeInnerShadow: Component = ({
+  ctx,
+  centerX,
+  centerY,
+}: ComponentParam) => {
   const path = new Path2D()
   path.arc(centerX, centerY, 400, 0, 2 * Math.PI)
   ctx.save()
-  ctx.fillStyle = 'green'
-  ctx.fill(path)
+  ctx.shadowColor = 'black'
+  ctx.shadowBlur = 15
+  ctx.shadowOffsetX = 10
+  ctx.shadowOffsetY = 10
+  ctx.strokeStyle = 'white'
+  ctx.stroke(path)
   ctx.restore()
   return {}
 }
@@ -40,7 +65,7 @@ const Piece = ({
 }: PieceParam & ComponentParam) => {
   const path = new Path2D()
   path.moveTo(0, 0)
-  path.arc(0, 0, 380, -arcLength / 2, +arcLength / 2)
+  path.arc(0, 0, 400, -arcLength / 2, +arcLength / 2)
   path.lineTo(0, 0)
   ctx.save()
   ctx.translate(centerX, centerY)
@@ -140,9 +165,9 @@ const draw = (
     initSpin,
   }
   return [
-    Edge(param),
     Pieces({ ...param, entries: queryParams.entries || [] }),
     Shaft(param),
+    Edge(param),
   ]
 }
 
