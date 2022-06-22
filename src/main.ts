@@ -27,6 +27,7 @@ export type Entry = {
 type PieceParam = Entry & {
   angle: number
   arcLength: number
+  color: string
 }
 const Piece = ({
   ctx,
@@ -34,6 +35,7 @@ const Piece = ({
   centerY,
   angle,
   arcLength,
+  color,
   label,
 }: PieceParam & ComponentParam) => {
   const path = new Path2D()
@@ -46,7 +48,7 @@ const Piece = ({
   ctx.lineWidth = 20
   ctx.strokeStyle = 'white'
   ctx.stroke(path)
-  ctx.fillStyle = `HSLA(${(angle / Math.PI) * 180}, 100%, 66%, 1)`
+  ctx.fillStyle = color
   ctx.fill(path)
   ctx.fillStyle = 'white'
   ctx.font = '50px Arial'
@@ -66,11 +68,15 @@ const Pieces = ({ entries, rotate, ...rest }: PiecesParam & ComponentParam) => {
 
 const entriesToPieceParams = (entries: Entry[]): PieceParam[] => {
   const total = entries.length
-  return entries.map((entry, index) => ({
-    ...entry,
-    angle: (index / total) * Math.PI * 2,
-    arcLength: (Math.PI * 2) / total,
-  }))
+  return entries.map((entry, index) => {
+    const angle = (index / total) * Math.PI * 2
+    return {
+      ...entry,
+      angle,
+      arcLength: (Math.PI * 2) / total,
+      color: `HSLA(${(angle / Math.PI) * 180}, 100%, 66%, 1)`,
+    }
+  })
 }
 
 const PlaySign = ({ ctx, centerX, centerY }: ComponentParam) => {
@@ -115,13 +121,13 @@ const draw = (
   const centerX = canvas.width / 2
   const centerY = canvas.height / 2
   const spin = (r: number, delta: number): void => {
-    if (delta < 0.01) {
+    if (delta < 0.005) {
       return
     }
     hooks = draw(canvas, queryParams, r)
-    window.requestAnimationFrame(() => spin(r + delta, delta * 0.97))
+    window.requestAnimationFrame(() => spin(r + delta, delta * 0.966))
   }
-  const initSpin = () => spin(rotate, Math.PI / 6)
+  const initSpin = () => spin(rotate, Math.PI / 5)
 
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   ctx.clearRect(0, 0, canvas.width, canvas.height)
