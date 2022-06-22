@@ -1,12 +1,11 @@
 # Spinner Maker
 
-Play and create spinner wheel by [#SpinnerMaker](https://spinner-maker.vercel.app/)!
+Play and create spinner wheel by [#SpinnerMaker](https://spinner-maker.vercel.app/?labels=1&labels=2&labels=3&labels=4&labels=5)!
 
 ## Debug
 
 ```shell
-nvm use
 pnpm install
-pnpm build
-open ./dist/index.html
+pnpm dev
+open http://localhost:3000?labels=1&labels=2&labels=3&labels=4&labels=5
 ```
