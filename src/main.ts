@@ -152,7 +152,7 @@ const draw = (
     hooks = draw(canvas, queryParams, r)
     window.requestAnimationFrame(() => spin(r + delta, delta * 0.966))
   }
-  const initSpin = () => spin(rotate, Math.PI / 5)
+  const initSpin = () => spin(rotate, 0.75 + Math.random())
 
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   ctx.clearRect(0, 0, canvas.width, canvas.height)
