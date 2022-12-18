@@ -1,23 +1,26 @@
 import './style.css'
 
-import { ComponentParam, Point } from './global'
+import { CanvasProps, ComponentProps, Point } from './global'
 import { getQueryParams, QueryParams } from './get-query-params'
 
 type Hook = {
   onHit?: () => void
   testHit?: (point: Point) => boolean
 }
-type Component = (param: ComponentParam) => Hook
+type Component = (
+  canvasProps: CanvasProps,
+  componentProps: ComponentProps
+) => Hook
 
 let hooks: Hook[]
 
-const Edge: Component = (param: ComponentParam) => {
-  EdgeInnerShadow(param)
-  EdgeLine(param)
+const Edge: Component = (canvasProps, componentProps) => {
+  EdgeInnerShadow(canvasProps, componentProps)
+  EdgeLine(canvasProps, componentProps)
   return {}
 }
 
-const EdgeLine: Component = ({ ctx, centerX, centerY }: ComponentParam) => {
+const EdgeLine: Component = ({ ctx, centerX, centerY }, _) => {
   const path = new Path2D()
   path.arc(centerX, centerY, 420, 0, 2 * Math.PI)
   ctx.save()
@@ -28,11 +31,7 @@ const EdgeLine: Component = ({ ctx, centerX, centerY }: ComponentParam) => {
   return {}
 }
 
-const EdgeInnerShadow: Component = ({
-  ctx,
-  centerX,
-  centerY,
-}: ComponentParam) => {
+const EdgeInnerShadow: Component = ({ ctx, centerX, centerY }, _) => {
   const path = new Path2D()
   path.arc(centerX, centerY, 400, 0, 2 * Math.PI)
   ctx.save()
@@ -54,15 +53,11 @@ type PieceParam = Entry & {
   arcLength: number
   color: string
 }
-const Piece = ({
-  ctx,
-  centerX,
-  centerY,
-  angle,
-  arcLength,
-  color,
-  label,
-}: PieceParam & ComponentParam) => {
+
+const Piece = (
+  { ctx, centerX, centerY }: CanvasProps,
+  { angle, arcLength, color, label }: PieceParam & ComponentProps
+) => {
   const path = new Path2D()
   path.moveTo(0, 0)
   path.arc(0, 0, 400, -arcLength / 2, +arcLength / 2)
@@ -84,9 +79,12 @@ const Piece = ({
 type PiecesParam = {
   entries: Entry[]
 }
-const Pieces = ({ entries, rotate, ...rest }: PiecesParam & ComponentParam) => {
+const Pieces = (
+  canvasProps: CanvasProps,
+  { entries, rotate, ...rest }: ComponentProps & PiecesParam
+) => {
   entriesToPieceParams(entries).forEach(({ angle, ...restParam }) => {
-    Piece({ angle: angle + rotate, ...restParam, rotate, ...rest })
+    Piece(canvasProps, { angle: angle + rotate, ...restParam, rotate, ...rest })
   })
   return {}
 }
@@ -104,7 +102,7 @@ const entriesToPieceParams = (entries: Entry[]): PieceParam[] => {
   })
 }
 
-const PlaySign = ({ ctx, centerX, centerY }: ComponentParam) => {
+const PlaySign = ({ ctx, centerX, centerY }: CanvasProps) => {
   const side = 30
   const path = new Path2D()
   path.moveTo(centerX - side / Math.sqrt(3), centerY - side)
@@ -117,7 +115,7 @@ const PlaySign = ({ ctx, centerX, centerY }: ComponentParam) => {
   ctx.restore()
 }
 
-const ShaftBody = ({ ctx, centerX, centerY }: ComponentParam) => {
+const ShaftBody = ({ ctx, centerX, centerY }: CanvasProps) => {
   const path = new Path2D()
   path.arc(centerX, centerY, 50, 0, 2 * Math.PI)
   ctx.save()
@@ -129,13 +127,15 @@ const ShaftBody = ({ ctx, centerX, centerY }: ComponentParam) => {
   ctx.restore()
 }
 
-const Shaft: Component = (param: ComponentParam) => {
-  ShaftBody(param)
-  PlaySign(param)
+const Shaft: Component = (canvasProps, componentProps) => {
+  ShaftBody(canvasProps)
+  PlaySign(canvasProps)
 
   const testHit = (point: Point) =>
-    (point.x - param.centerX) ** 2 + (point.y - param.centerY) ** 2 < 50 ** 2
-  return { onHit: param.initSpin, testHit }
+    (point.x - canvasProps.centerX) ** 2 +
+      (point.y - canvasProps.centerY) ** 2 <
+    50 ** 2
+  return { onHit: componentProps.initSpin, testHit }
 }
 
 const draw = (
@@ -157,17 +157,19 @@ const draw = (
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-  const param: ComponentParam = {
+  const canvasProps: CanvasProps = { ctx, centerX, centerY }
+  const componentProps: ComponentProps = {
     rotate,
-    ctx,
-    centerX,
-    centerY,
+
     initSpin,
   }
   return [
-    Pieces({ ...param, entries: queryParams.entries || [] }),
-    Shaft(param),
-    Edge(param),
+    Pieces(canvasProps, {
+      ...componentProps,
+      entries: queryParams.entries || [],
+    }),
+    Shaft(canvasProps, componentProps),
+    Edge(canvasProps, componentProps),
   ]
 }
 
