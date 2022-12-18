@@ -99,7 +99,7 @@ const entriesToPieceParams = (entries: Entry[]): PieceParam[] => {
       ...entry,
       angle,
       arcLength: (Math.PI * 2) / total,
-      color: `HSLA(${(angle / Math.PI) * 180}, 100%, 66%, 1)`,
+      color: `HSLA(${(angle / Math.PI) * 180}, 100%, 58%, 1)`,
     }
   })
 }
